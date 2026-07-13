@@ -1,0 +1,13 @@
+{
+  "name": "Дистанционная Приёмка — Магнит",
+  "short_name": "ДП Магнит",
+  "description": "Ручное заполнение чек-листа дистанционной приёмки и выгрузка двух форм Excel",
+  "lang": "ru",
+  "start_url": "./index.html?v=19",
+  "display": "standalone",
+  "background_color": "#e9ecef",
+  "theme_color": "#e30613",
+  "icons": [
+    {"src": "assets/magnit-mark.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

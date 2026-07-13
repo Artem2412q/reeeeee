@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#e30613" />
+  <meta name="description" content="Дистанционная приёмка: ручное заполнение чек-листа и выгрузка двух форм Excel." />
+  <title>Дистанционная Приёмка — Магнит</title>
+  <link rel="manifest" href="manifest.webmanifest?v=21" />
+  <link rel="stylesheet" href="styles.css?v=21" />
+</head>
+<body class="auth-locked">
+
+  <div class="auth-screen" id="loginOverlay">
+    <div class="auth-grid">
+      <section class="auth-hero">
+        <div class="auth-badge"><span></span>Внутренняя система</div>
+        <div class="auth-hero-brand"><div class="auth-hero-mark"><img src="assets/magnit-mark.png" alt="Магнит" /></div><div><span>ПАО «Магнит»</span><strong>Дистанционная приёмка</strong></div></div>
+        <div class="auth-hero-copy">
+          <h1>Контроль поставок<br>без лишних действий</h1>
+          <p>Удобное рабочее пространство для дистанционной приёмки, фиксации результатов и выгрузки Excel-форм.</p>
+          <ul class="auth-feature-list">
+            <li>Понятный пошаговый процесс</li>
+            <li>Автоматическое локальное сохранение</li>
+            <li>Выгрузка двух форм Excel</li>
+          </ul>
+        </div>
+      </section>
+      <section class="auth-card">
+        <div class="auth-card-top">
+          <div class="auth-logo-card"><img src="assets/magnit-mark.png" alt="Магнит" /></div>
+          <div>
+            <div class="eyebrow">Безопасный доступ</div>
+            <h2>Добро пожаловать</h2>
+            <p>Введите рабочие данные, чтобы открыть систему дистанционной приёмки.</p>
+          </div>
+        </div>
+        <form id="loginForm" class="auth-form" autocomplete="off">
+          <div class="field auth-field">
+            <label for="loginUsername">Логин</label>
+            <input class="input" id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Введите логин" />
+          </div>
+          <div class="field auth-field">
+            <label for="loginPassword">Пароль</label>
+            <div class="auth-password-wrap">
+              <input class="input" id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" />
+              <button type="button" class="auth-toggle-pass" id="togglePassword" aria-label="Показать пароль">Показать</button>
+            </div>
+          </div>
+          <div class="auth-error" id="loginError" role="alert" aria-live="polite"></div>
+          <button class="button button-primary full auth-submit" type="submit">Войти в систему</button>
+        </form>
+        <div class="auth-footnote"><span></span>Данные сессии хранятся только до закрытия браузера.</div>
+      </section>
+    </div>
+  </div>
+
+  <div class="app-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark-wrap"><img src="assets/magnit-mark.png" alt="Магнит" class="brand-mark" /></div>
+        <div class="brand-text">
+          <span class="brand-company">ПАО «Магнит»</span>
+          <strong>Дистанционная Приёмка</strong>
+          <span>Рабочее пространство контроля качества поставок</span>
+        </div>
+      </div>
+
+      <div class="sidebar-caption">Контроль качества поставок</div>
+
+      <nav class="main-nav" aria-label="Основная навигация">
+        <button class="nav-item active" data-page="shipment"><span class="nav-index">01</span><span>Приёмка</span><span class="nav-state" id="navCheckShipment"></span></button>
+        <button class="nav-item" data-page="products"><span class="nav-index">02</span><span>Товары</span><span class="nav-state" id="navCheckProducts"></span></button>
+        <button class="nav-item" data-page="checklist"><span class="nav-index">03</span><span>Чек-лист</span><span class="nav-state" id="navCheckChecklist"></span></button>
+        <button class="nav-item" data-page="defects"><span class="nav-index">04</span><span>Дефекты</span><span class="nav-state" id="navCheckDefects"></span></button>
+        <button class="nav-item" data-page="summary"><span class="nav-index">05</span><span>Итоги и Excel</span><span class="nav-state" id="navCheckSummary"></span></button>
+      </nav>
+
+      <div class="sidebar-status">
+        <div class="status-line"><span>Готовность</span><strong id="sidebarProgressText">0%</strong></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <small id="sidebarProgressHint">Начните с данных поставки</small>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="button button-ghost full" id="openNotesSidebar">Заметки</button>
+        <button class="button button-primary full" id="exportNewSidebar">Excel — новый</button>
+        <button class="button button-secondary full" id="exportOldSidebar">Excel — старый</button>
+        <button class="button button-ghost full" id="logoutSidebar">Выйти из системы</button>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-only" id="menuToggle" aria-label="Открыть меню">☰</button>
+          <div class="topbar-title">
+            <span class="eyebrow" id="pageEyebrow">Этап 1 из 5</span>
+            <h1 id="pageTitle">Приёмка</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="save-state" id="saveState"><span></span><b>Сохранено</b><small>локально</small></div>
+          <button class="icon-button" id="themeToggle" aria-label="Переключить тему">◐</button>
+          <button class="button button-ghost desktop-only" id="logoutButton">Выйти</button>
+          <button class="button button-ghost desktop-only" id="openNotesTop">Заметки</button>
+          <div class="export-actions desktop-only">
+            <button class="button button-primary" id="exportNewTop">Новый Excel</button>
+            <button class="button button-secondary" id="exportOldTop">Старый Excel</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="page-content" id="pageContent" aria-live="polite"></section>
+      <footer class="legal-footer">Внутренняя разработка подразделения дистанционной приёмки. Использование, копирование и передача решения третьим лицам допускаются только по предварительному двустороннему согласованию.</footer>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Мобильная навигация" hidden>
+    <button class="mobile-nav-item active" data-page="shipment"><span>01</span>Приёмка</button>
+    <button class="mobile-nav-item" data-page="products"><span>02</span>Товары</button>
+    <button class="mobile-nav-item" data-page="checklist"><span>03</span>Чек-лист</button>
+    <button class="mobile-nav-item" data-page="defects"><span>04</span>Дефекты</button>
+    <button class="mobile-nav-item" data-page="summary"><span>05</span>Итоги</button>
+  </nav>
+
+  <aside class="notes-panel" id="notesPanel" aria-label="Заметки">
+    <div class="notes-header" id="notesDragHandle">
+      <div><strong>Заметки</strong><span id="notesPinStatus">Закреплены</span></div>
+      <div class="notes-actions">
+        <button class="icon-button compact" id="notesTimestamp" title="Добавить время">＋</button>
+        <button class="icon-button compact active" id="notesPin" title="Закрепить">⌖</button>
+        <button class="icon-button compact" id="notesMinimize" title="Свернуть">—</button>
+        <button class="icon-button compact" id="notesClose" title="Закрыть">×</button>
+      </div>
+    </div>
+    <div class="notes-body">
+      <textarea id="notesTextarea" placeholder="Наблюдения, вопросы и важные детали приёмки…"></textarea>
+      <div class="notes-footer"><span>Сохраняется автоматически</span><button class="text-button" id="clearNotes">Очистить</button></div>
+    </div>
+  </aside>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header"><div><span class="eyebrow">Проверка заполнения</span><h2 id="modalTitle">Перед выгрузкой</h2></div><button class="icon-button" id="modalClose">×</button></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay" hidden>
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <strong id="loadingTitle">Формируем Excel</strong>
+      <span id="loadingStatus">Подготавливаем шаблон…</span>
+      <div class="loading-progress"><div id="loadingProgressBar"></div></div>
+      <button class="button button-ghost" id="loadingCancel">Отменить</button>
+    </div>
+  </div>
+
+  <script src="vendor/exceljs.min.js?v=21"></script>
+  <script src="template-data.js?v=21"></script>
+  <script src="old-template-data.js?v=21"></script>
+  <script src="app.js?v=21"></script>
+</body>
+</html>
