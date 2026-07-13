@@ -479,10 +479,10 @@
             ${measureCard('Калибр', index, 'caliberMass', sku.caliberMass)}
           </div>
           <div class="kpi-grid">
-            <div class="kpi"><span>Брак</span><strong>${formatPercent(waste)}</strong><small>расчёт от массы выборки</small></div>
-            <div class="kpi"><span>Нестандарт</span><strong>${formatPercent(nonstandard)}</strong><small>расчёт от массы выборки</small></div>
-            <div class="kpi"><span>Осыпь</span><strong>${formatPercent(debris)}</strong><small>расчёт от массы выборки</small></div>
-            <div class="kpi"><span>Калибр</span><strong>${formatPercent(caliber)}</strong><small>расчёт от массы выборки</small></div>
+            <div class="kpi"><span>Брак</span><strong data-percent-output="defectMass">${formatPercent(waste)}</strong><small>расчёт от массы выборки</small></div>
+            <div class="kpi"><span>Нестандарт</span><strong data-percent-output="nonstandardMass">${formatPercent(nonstandard)}</strong><small>расчёт от массы выборки</small></div>
+            <div class="kpi"><span>Осыпь</span><strong data-percent-output="debrisMass">${formatPercent(debris)}</strong><small>расчёт от массы выборки</small></div>
+            <div class="kpi"><span>Калибр</span><strong data-percent-output="caliberMass">${formatPercent(caliber)}</strong><small>расчёт от массы выборки</small></div>
           </div>
         </div>
         <div class="subsection">
@@ -670,13 +670,30 @@
     scheduleSave();
   }
 
+  function updateMassPercentages(skuIndex) {
+    const sku = state.skus[skuIndex];
+    const card = document.querySelector(`[data-product-card="${skuIndex}"]`);
+    if (!sku || !card) return;
+
+    const massFields = ['defectMass', 'nonstandardMass', 'debrisMass', 'caliberMass'];
+    massFields.forEach(field => {
+      const output = card.querySelector(`[data-percent-output="${field}"]`);
+      if (output) output.textContent = formatPercent(percent(sku[field], sku.sampleMass));
+    });
+  }
+
   function handleInput(event) {
     if (!authenticated) return;
     const el = event.target;
     if (el.dataset.field) { setPath(el.dataset.field, el.value); scheduleSave(); if (el.dataset.field.startsWith('shipment.')) updateGlobalProgress(); return; }
     if (el.dataset.skuField !== undefined) {
-      const sku = state.skus[Number(el.dataset.sku)]; if (!sku) return;
-      sku[el.dataset.skuField] = el.value; scheduleSave();
+      const skuIndex = Number(el.dataset.sku);
+      const sku = state.skus[skuIndex]; if (!sku) return;
+      sku[el.dataset.skuField] = el.value;
+      if (['sampleMass', 'defectMass', 'nonstandardMass', 'debrisMass', 'caliberMass'].includes(el.dataset.skuField)) {
+        updateMassPercentages(skuIndex);
+      }
+      scheduleSave();
       return;
     }
     if (el.dataset.answerValue !== undefined) {
@@ -708,7 +725,19 @@
     if (!authenticated) return;
     const el = event.target;
     if (el.dataset.field) { setPath(el.dataset.field, el.value); scheduleSave(); updateGlobalProgress(); return; }
-    if (el.dataset.skuField !== undefined) { const sku = state.skus[Number(el.dataset.sku)]; if (sku) sku[el.dataset.skuField] = el.value; scheduleSave(); updateGlobalProgress(); return; }
+    if (el.dataset.skuField !== undefined) {
+      const skuIndex = Number(el.dataset.sku);
+      const sku = state.skus[skuIndex];
+      if (sku) {
+        sku[el.dataset.skuField] = el.value;
+        if (['sampleMass', 'defectMass', 'nonstandardMass', 'debrisMass', 'caliberMass'].includes(el.dataset.skuField)) {
+          updateMassPercentages(skuIndex);
+        }
+      }
+      scheduleSave();
+      updateGlobalProgress();
+      return;
+    }
     if (el.dataset.defectField) {
       const d = state.skus[Number(el.dataset.sku)]?.defects?.[Number(el.dataset.defect)];
       if (d) d[el.dataset.defectField] = el.value;

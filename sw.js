@@ -1,4 +1,4 @@
-const CACHE_PREFIX = 'magnit-dp-manual-v21-';
+const CACHE_PREFIX = 'magnit-dp-manual-v23-';
 self.addEventListener('install', event => self.skipWaiting());
 self.addEventListener('activate', event => {
   event.waitUntil(
